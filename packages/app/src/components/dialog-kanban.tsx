@@ -8,7 +8,7 @@ import { IconButton } from "@opencode-ai/ui/icon-button"
 import { Spinner } from "@opencode-ai/ui/spinner"
 import { DropdownMenu } from "@opencode-ai/ui/dropdown-menu"
 import { Select } from "@opencode-ai/ui/select"
-import { useGlobalSDK } from "@/context/global-sdk"
+import { useServerSDK } from "@/context/server-sdk"
 
 type KanbanTask = {
   id: string
@@ -29,7 +29,7 @@ type KanbanTask = {
 type KanbanStage =
   | { name: string; type: "entry" }
   | { name: string; type: "human-gate"; next: string }
-  | { name: string; prompt: string; completion: string; next: string }
+  | { name: string; type: "auto"; prompt: string; completion: string; next: string }
   | { name: string; type: "terminal" }
 
 type KanbanConfig = {
@@ -42,7 +42,7 @@ interface Props {
 }
 
 export const DialogKanban: Component<Props> = (props) => {
-  const globalSDK = useGlobalSDK()
+  const globalSDK = useServerSDK()
   const dialog = useDialog()
   const [tasks, setTasks] = createSignal<KanbanTask[]>([])
   const [config, setConfig] = createSignal<KanbanConfig | null>(null)
