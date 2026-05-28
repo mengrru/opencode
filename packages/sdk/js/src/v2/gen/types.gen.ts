@@ -32,6 +32,9 @@ export type Event =
   | EventCommandExecuted
   | EventProjectUpdated
   | EventSessionCompacted
+  | EventKanbanTaskCreated
+  | EventKanbanTaskUpdated
+  | EventKanbanTaskDeleted
   | EventVcsBranchUpdated
   | EventWorkspaceReady
   | EventWorkspaceFailed
@@ -833,6 +836,9 @@ export type GlobalEvent = {
     | EventCommandExecuted
     | EventProjectUpdated
     | EventSessionCompacted
+    | EventKanbanTaskCreated
+    | EventKanbanTaskUpdated
+    | EventKanbanTaskDeleted
     | EventVcsBranchUpdated
     | EventWorkspaceReady
     | EventWorkspaceFailed
@@ -1663,6 +1669,22 @@ export type FormatterStatus = {
   name: string
   extensions: Array<string>
   enabled: boolean
+}
+
+export type KanbanTask = {
+  id: string
+  projectID: string
+  profile: string
+  workspaceID?: string
+  sessionID?: string
+  sessionDirectory?: string
+  prompt?: string
+  title: string
+  description?: string
+  stage: string
+  order: number | "NaN" | "Infinity" | "-Infinity" | "Infinity" | "-Infinity" | "NaN"
+  timeCreated: number | "NaN" | "Infinity" | "-Infinity" | "Infinity" | "-Infinity" | "NaN"
+  timeUpdated: number | "NaN" | "Infinity" | "-Infinity" | "Infinity" | "-Infinity" | "NaN"
 }
 
 export type McpStatusConnected = {
@@ -2697,6 +2719,33 @@ export type EventSessionCompacted = {
   type: "session.compacted"
   properties: {
     sessionID: string
+  }
+}
+
+export type EventKanbanTaskCreated = {
+  id: string
+  type: "kanban.task.created"
+  properties: {
+    taskID: string
+    projectID: string
+  }
+}
+
+export type EventKanbanTaskUpdated = {
+  id: string
+  type: "kanban.task.updated"
+  properties: {
+    taskID: string
+    projectID: string
+  }
+}
+
+export type EventKanbanTaskDeleted = {
+  id: string
+  type: "kanban.task.deleted"
+  properties: {
+    taskID: string
+    projectID: string
   }
 }
 
@@ -5068,6 +5117,382 @@ export type FormatterStatusResponses = {
 }
 
 export type FormatterStatusResponse = FormatterStatusResponses[keyof FormatterStatusResponses]
+
+export type KanbanProfilesData = {
+  body?: never
+  path?: never
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/kanban/profiles"
+}
+
+export type KanbanProfilesErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+}
+
+export type KanbanProfilesError = KanbanProfilesErrors[keyof KanbanProfilesErrors]
+
+export type KanbanProfilesResponses = {
+  /**
+   * Kanban profile names
+   */
+  200: Array<string>
+}
+
+export type KanbanProfilesResponse = KanbanProfilesResponses[keyof KanbanProfilesResponses]
+
+export type KanbanProfileConfigData = {
+  body?: never
+  path: {
+    profile: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/kanban/profile/{profile}/config"
+}
+
+export type KanbanProfileConfigErrors = {
+  /**
+   * BadRequest | InvalidRequestError
+   */
+  400: EffectHttpApiErrorBadRequest | InvalidRequestError
+}
+
+export type KanbanProfileConfigError = KanbanProfileConfigErrors[keyof KanbanProfileConfigErrors]
+
+export type KanbanProfileConfigResponses = {
+  /**
+   * Kanban stage configuration
+   */
+  200: {
+    stages: Array<
+      | {
+          name: string
+          type: "entry"
+        }
+      | {
+          name: string
+          type: "human-gate"
+          next: string
+        }
+      | {
+          name: string
+          type: "auto"
+          prompt: string
+          completion: string
+          next: string
+        }
+      | {
+          name: string
+          type: "terminal"
+        }
+    >
+  }
+}
+
+export type KanbanProfileConfigResponse = KanbanProfileConfigResponses[keyof KanbanProfileConfigResponses]
+
+export type KanbanProfileTaskListData = {
+  body?: never
+  path: {
+    profile: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/kanban/profile/{profile}/task"
+}
+
+export type KanbanProfileTaskListErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+}
+
+export type KanbanProfileTaskListError = KanbanProfileTaskListErrors[keyof KanbanProfileTaskListErrors]
+
+export type KanbanProfileTaskListResponses = {
+  /**
+   * Kanban tasks
+   */
+  200: Array<KanbanTask>
+}
+
+export type KanbanProfileTaskListResponse = KanbanProfileTaskListResponses[keyof KanbanProfileTaskListResponses]
+
+export type KanbanProfileTaskCreateData = {
+  body?: {
+    title: string
+    description?: string
+    stage?: string
+    profile?: string
+  }
+  path: {
+    profile: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/kanban/profile/{profile}/task"
+}
+
+export type KanbanProfileTaskCreateErrors = {
+  /**
+   * BadRequest | InvalidRequestError
+   */
+  400: EffectHttpApiErrorBadRequest | InvalidRequestError
+}
+
+export type KanbanProfileTaskCreateError = KanbanProfileTaskCreateErrors[keyof KanbanProfileTaskCreateErrors]
+
+export type KanbanProfileTaskCreateResponses = {
+  /**
+   * Created kanban task
+   */
+  200: KanbanTask
+}
+
+export type KanbanProfileTaskCreateResponse = KanbanProfileTaskCreateResponses[keyof KanbanProfileTaskCreateResponses]
+
+export type KanbanProfileTaskRemoveData = {
+  body?: never
+  path: {
+    profile: string
+    taskID: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/kanban/profile/{profile}/task/{taskID}"
+}
+
+export type KanbanProfileTaskRemoveErrors = {
+  /**
+   * BadRequest | InvalidRequestError
+   */
+  400: EffectHttpApiErrorBadRequest | InvalidRequestError
+}
+
+export type KanbanProfileTaskRemoveError = KanbanProfileTaskRemoveErrors[keyof KanbanProfileTaskRemoveErrors]
+
+export type KanbanProfileTaskRemoveResponses = {
+  /**
+   * Deleted kanban task
+   */
+  200: KanbanTask
+}
+
+export type KanbanProfileTaskRemoveResponse = KanbanProfileTaskRemoveResponses[keyof KanbanProfileTaskRemoveResponses]
+
+export type KanbanProfileTaskGetData = {
+  body?: never
+  path: {
+    profile: string
+    taskID: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/kanban/profile/{profile}/task/{taskID}"
+}
+
+export type KanbanProfileTaskGetErrors = {
+  /**
+   * BadRequest | InvalidRequestError
+   */
+  400: EffectHttpApiErrorBadRequest | InvalidRequestError
+}
+
+export type KanbanProfileTaskGetError = KanbanProfileTaskGetErrors[keyof KanbanProfileTaskGetErrors]
+
+export type KanbanProfileTaskGetResponses = {
+  /**
+   * Kanban task
+   */
+  200: KanbanTask
+}
+
+export type KanbanProfileTaskGetResponse = KanbanProfileTaskGetResponses[keyof KanbanProfileTaskGetResponses]
+
+export type KanbanProfileTaskUpdateData = {
+  body?: {
+    title?: string
+    description?: string
+    stage?: string
+  }
+  path: {
+    profile: string
+    taskID: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/kanban/profile/{profile}/task/{taskID}"
+}
+
+export type KanbanProfileTaskUpdateErrors = {
+  /**
+   * BadRequest | InvalidRequestError
+   */
+  400: EffectHttpApiErrorBadRequest | InvalidRequestError
+}
+
+export type KanbanProfileTaskUpdateError = KanbanProfileTaskUpdateErrors[keyof KanbanProfileTaskUpdateErrors]
+
+export type KanbanProfileTaskUpdateResponses = {
+  /**
+   * Updated kanban task
+   */
+  200: KanbanTask
+}
+
+export type KanbanProfileTaskUpdateResponse = KanbanProfileTaskUpdateResponses[keyof KanbanProfileTaskUpdateResponses]
+
+export type KanbanProfileTaskStartData = {
+  body?: never
+  path: {
+    profile: string
+    taskID: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/kanban/profile/{profile}/task/{taskID}/start"
+}
+
+export type KanbanProfileTaskStartErrors = {
+  /**
+   * BadRequest | InvalidRequestError
+   */
+  400: EffectHttpApiErrorBadRequest | InvalidRequestError
+}
+
+export type KanbanProfileTaskStartError = KanbanProfileTaskStartErrors[keyof KanbanProfileTaskStartErrors]
+
+export type KanbanProfileTaskStartResponses = {
+  /**
+   * Started kanban task
+   */
+  200: KanbanTask
+}
+
+export type KanbanProfileTaskStartResponse = KanbanProfileTaskStartResponses[keyof KanbanProfileTaskStartResponses]
+
+export type KanbanProfileTaskApproveData = {
+  body?: never
+  path: {
+    profile: string
+    taskID: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/kanban/profile/{profile}/task/{taskID}/approve"
+}
+
+export type KanbanProfileTaskApproveErrors = {
+  /**
+   * BadRequest | InvalidRequestError
+   */
+  400: EffectHttpApiErrorBadRequest | InvalidRequestError
+}
+
+export type KanbanProfileTaskApproveError = KanbanProfileTaskApproveErrors[keyof KanbanProfileTaskApproveErrors]
+
+export type KanbanProfileTaskApproveResponses = {
+  /**
+   * Approved kanban task
+   */
+  200: KanbanTask
+}
+
+export type KanbanProfileTaskApproveResponse =
+  KanbanProfileTaskApproveResponses[keyof KanbanProfileTaskApproveResponses]
+
+export type KanbanProfileTaskTransitionData = {
+  body?: {
+    targetStage: string
+  }
+  path: {
+    profile: string
+    taskID: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/kanban/profile/{profile}/task/{taskID}/transition"
+}
+
+export type KanbanProfileTaskTransitionErrors = {
+  /**
+   * BadRequest | InvalidRequestError
+   */
+  400: EffectHttpApiErrorBadRequest | InvalidRequestError
+}
+
+export type KanbanProfileTaskTransitionError =
+  KanbanProfileTaskTransitionErrors[keyof KanbanProfileTaskTransitionErrors]
+
+export type KanbanProfileTaskTransitionResponses = {
+  /**
+   * Transitioned kanban task
+   */
+  200: KanbanTask
+}
+
+export type KanbanProfileTaskTransitionResponse =
+  KanbanProfileTaskTransitionResponses[keyof KanbanProfileTaskTransitionResponses]
+
+export type KanbanProfileTaskManualTransitionData = {
+  body?: {
+    targetStage: string
+  }
+  path: {
+    profile: string
+    taskID: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/kanban/profile/{profile}/task/{taskID}/manual-transition"
+}
+
+export type KanbanProfileTaskManualTransitionErrors = {
+  /**
+   * BadRequest | InvalidRequestError
+   */
+  400: EffectHttpApiErrorBadRequest | InvalidRequestError
+}
+
+export type KanbanProfileTaskManualTransitionError =
+  KanbanProfileTaskManualTransitionErrors[keyof KanbanProfileTaskManualTransitionErrors]
+
+export type KanbanProfileTaskManualTransitionResponses = {
+  /**
+   * Manual transition with auto-prompt
+   */
+  200: KanbanTask
+}
+
+export type KanbanProfileTaskManualTransitionResponse =
+  KanbanProfileTaskManualTransitionResponses[keyof KanbanProfileTaskManualTransitionResponses]
 
 export type McpStatusData = {
   body?: never

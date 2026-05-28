@@ -1,8 +1,10 @@
+import { createSignal } from "solid-js"
 import type { SelectedLineRange } from "@/context/file"
 
 type HandoffSession = {
   prompt: string
   files: Record<string, SelectedLineRange | null>
+  autoSend?: boolean
 }
 
 const MAX = 40
@@ -11,6 +13,8 @@ const store = {
   session: new Map<string, HandoffSession>(),
   terminal: new Map<string, string[]>(),
 }
+
+const [version, setVersion] = createSignal(0)
 
 const touch = <K, V>(map: Map<K, V>, key: K, value: V) => {
   map.delete(key)
@@ -25,9 +29,12 @@ const touch = <K, V>(map: Map<K, V>, key: K, value: V) => {
 export const setSessionHandoff = (key: string, patch: Partial<HandoffSession>) => {
   const prev = store.session.get(key) ?? { prompt: "", files: {} }
   touch(store.session, key, { ...prev, ...patch })
+  setVersion((v) => v + 1)
 }
 
 export const getSessionHandoff = (key: string) => store.session.get(key)
+
+export const getSessionHandoffVersion = () => version()
 
 export const setTerminalHandoff = (key: string, value: string[]) => {
   touch(store.terminal, key, value)

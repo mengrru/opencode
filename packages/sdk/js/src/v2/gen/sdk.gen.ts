@@ -82,6 +82,28 @@ import type {
   GlobalUpgradeResponses,
   InstanceDisposeErrors,
   InstanceDisposeResponses,
+  KanbanProfileConfigErrors,
+  KanbanProfileConfigResponses,
+  KanbanProfilesErrors,
+  KanbanProfilesResponses,
+  KanbanProfileTaskApproveErrors,
+  KanbanProfileTaskApproveResponses,
+  KanbanProfileTaskCreateErrors,
+  KanbanProfileTaskCreateResponses,
+  KanbanProfileTaskGetErrors,
+  KanbanProfileTaskGetResponses,
+  KanbanProfileTaskListErrors,
+  KanbanProfileTaskListResponses,
+  KanbanProfileTaskManualTransitionErrors,
+  KanbanProfileTaskManualTransitionResponses,
+  KanbanProfileTaskRemoveErrors,
+  KanbanProfileTaskRemoveResponses,
+  KanbanProfileTaskStartErrors,
+  KanbanProfileTaskStartResponses,
+  KanbanProfileTaskTransitionErrors,
+  KanbanProfileTaskTransitionResponses,
+  KanbanProfileTaskUpdateErrors,
+  KanbanProfileTaskUpdateResponses,
   LspStatusErrors,
   LspStatusResponses,
   McpAddErrors,
@@ -1953,6 +1975,468 @@ export class Formatter extends HeyApiClient {
       ...options,
       ...params,
     })
+  }
+}
+
+export class Task extends HeyApiClient {
+  /**
+   * List kanban tasks
+   *
+   * List all kanban tasks for a profile.
+   */
+  public list<ThrowOnError extends boolean = false>(
+    parameters: {
+      profile: string
+      directory?: string
+      workspace?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "profile" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<
+      KanbanProfileTaskListResponses,
+      KanbanProfileTaskListErrors,
+      ThrowOnError
+    >({
+      url: "/kanban/profile/{profile}/task",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Create kanban task
+   *
+   * Create a new kanban task.
+   */
+  public create<ThrowOnError extends boolean = false>(
+    parameters: {
+      path_profile: string
+      directory?: string
+      workspace?: string
+      title?: string
+      description?: string
+      stage?: string
+      body_profile?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            {
+              in: "path",
+              key: "path_profile",
+              map: "profile",
+            },
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+            { in: "body", key: "title" },
+            { in: "body", key: "description" },
+            { in: "body", key: "stage" },
+            {
+              in: "body",
+              key: "body_profile",
+              map: "profile",
+            },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<
+      KanbanProfileTaskCreateResponses,
+      KanbanProfileTaskCreateErrors,
+      ThrowOnError
+    >({
+      url: "/kanban/profile/{profile}/task",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Remove kanban task
+   *
+   * Delete a kanban task.
+   */
+  public remove<ThrowOnError extends boolean = false>(
+    parameters: {
+      profile: string
+      taskID: string
+      directory?: string
+      workspace?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "profile" },
+            { in: "path", key: "taskID" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).delete<
+      KanbanProfileTaskRemoveResponses,
+      KanbanProfileTaskRemoveErrors,
+      ThrowOnError
+    >({
+      url: "/kanban/profile/{profile}/task/{taskID}",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Get kanban task
+   *
+   * Get a specific kanban task by ID.
+   */
+  public get<ThrowOnError extends boolean = false>(
+    parameters: {
+      profile: string
+      taskID: string
+      directory?: string
+      workspace?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "profile" },
+            { in: "path", key: "taskID" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<
+      KanbanProfileTaskGetResponses,
+      KanbanProfileTaskGetErrors,
+      ThrowOnError
+    >({
+      url: "/kanban/profile/{profile}/task/{taskID}",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Update kanban task
+   *
+   * Update a kanban task's title, description, or stage.
+   */
+  public update<ThrowOnError extends boolean = false>(
+    parameters: {
+      profile: string
+      taskID: string
+      directory?: string
+      workspace?: string
+      title?: string
+      description?: string
+      stage?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "profile" },
+            { in: "path", key: "taskID" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+            { in: "body", key: "title" },
+            { in: "body", key: "description" },
+            { in: "body", key: "stage" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).patch<
+      KanbanProfileTaskUpdateResponses,
+      KanbanProfileTaskUpdateErrors,
+      ThrowOnError
+    >({
+      url: "/kanban/profile/{profile}/task/{taskID}",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Start kanban task
+   *
+   * Start a kanban task: creates a workspace (worktree), a new session, injects the stage prompt, and transitions to the first active stage.
+   */
+  public start<ThrowOnError extends boolean = false>(
+    parameters: {
+      profile: string
+      taskID: string
+      directory?: string
+      workspace?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "profile" },
+            { in: "path", key: "taskID" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<
+      KanbanProfileTaskStartResponses,
+      KanbanProfileTaskStartErrors,
+      ThrowOnError
+    >({
+      url: "/kanban/profile/{profile}/task/{taskID}/start",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Approve kanban task
+   *
+   * Approve a task at a human-gate stage, moving it to the next stage.
+   */
+  public approve<ThrowOnError extends boolean = false>(
+    parameters: {
+      profile: string
+      taskID: string
+      directory?: string
+      workspace?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "profile" },
+            { in: "path", key: "taskID" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<
+      KanbanProfileTaskApproveResponses,
+      KanbanProfileTaskApproveErrors,
+      ThrowOnError
+    >({
+      url: "/kanban/profile/{profile}/task/{taskID}/approve",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Transition kanban task
+   *
+   * Manually transition a kanban task to a target stage.
+   */
+  public transition<ThrowOnError extends boolean = false>(
+    parameters: {
+      profile: string
+      taskID: string
+      directory?: string
+      workspace?: string
+      targetStage?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "profile" },
+            { in: "path", key: "taskID" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+            { in: "body", key: "targetStage" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<
+      KanbanProfileTaskTransitionResponses,
+      KanbanProfileTaskTransitionErrors,
+      ThrowOnError
+    >({
+      url: "/kanban/profile/{profile}/task/{taskID}/transition",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Manually transition kanban task with auto-prompt
+   *
+   * Manually transition a kanban task to a target stage. If the target stage has a prompt and the task has an active session, generates and returns the prompt.
+   */
+  public manualTransition<ThrowOnError extends boolean = false>(
+    parameters: {
+      profile: string
+      taskID: string
+      directory?: string
+      workspace?: string
+      targetStage?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "profile" },
+            { in: "path", key: "taskID" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+            { in: "body", key: "targetStage" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<
+      KanbanProfileTaskManualTransitionResponses,
+      KanbanProfileTaskManualTransitionErrors,
+      ThrowOnError
+    >({
+      url: "/kanban/profile/{profile}/task/{taskID}/manual-transition",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+}
+
+export class Profile extends HeyApiClient {
+  /**
+   * Get kanban config
+   *
+   * Get the kanban stage configuration for a profile.
+   */
+  public config<ThrowOnError extends boolean = false>(
+    parameters: {
+      profile: string
+      directory?: string
+      workspace?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "profile" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<KanbanProfileConfigResponses, KanbanProfileConfigErrors, ThrowOnError>({
+      url: "/kanban/profile/{profile}/config",
+      ...options,
+      ...params,
+    })
+  }
+
+  private _task?: Task
+  get task(): Task {
+    return (this._task ??= new Task({ client: this.client }))
+  }
+}
+
+export class Kanban extends HeyApiClient {
+  /**
+   * List kanban profiles
+   *
+   * List available kanban profile names for the current project.
+   */
+  public profiles<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      workspace?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<KanbanProfilesResponses, KanbanProfilesErrors, ThrowOnError>({
+      url: "/kanban/profiles",
+      ...options,
+      ...params,
+    })
+  }
+
+  private _profile?: Profile
+  get profile(): Profile {
+    return (this._profile ??= new Profile({ client: this.client }))
   }
 }
 
@@ -5099,6 +5583,11 @@ export class OpencodeClient extends HeyApiClient {
   private _formatter?: Formatter
   get formatter(): Formatter {
     return (this._formatter ??= new Formatter({ client: this.client }))
+  }
+
+  private _kanban?: Kanban
+  get kanban(): Kanban {
+    return (this._kanban ??= new Kanban({ client: this.client }))
   }
 
   private _mcp?: Mcp

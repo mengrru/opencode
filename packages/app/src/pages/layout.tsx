@@ -1233,6 +1233,21 @@ export default function Layout(props: ParentProps) {
     })
   }
 
+  function openKanban() {
+    const run = ++dialogRun
+    const directory = currentProject()?.worktree ?? (initialDirectory ? projectRoot(initialDirectory) : "")
+    void import("@/components/dialog-kanban").then((x) => {
+      if (dialogDead || dialogRun !== run) return
+      dialog.show(() => <x.DialogKanban directory={directory} onNavigate={(sessionDir, sessionID, prompt) => {
+        if (prompt) {
+          const slug = base64Encode(sessionDir)
+          setSessionHandoff(`${slug}/${sessionID}`, { prompt, autoSend: true })
+        }
+        navigateWithSidebarReset(`/${base64Encode(sessionDir)}/session/${sessionID}`)
+      }} />)
+    })
+  }
+
   function projectRoot(directory: string) {
     const key = pathKey(directory)
     const project = layout.projects
@@ -2354,6 +2369,7 @@ export default function Layout(props: ParentProps) {
       settingsLabel={() => language.t("sidebar.settings")}
       settingsKeybind={() => command.keybind("settings.open")}
       onOpenSettings={openSettings}
+      onOpenKanban={openKanban}
       helpLabel={() => language.t("sidebar.help")}
       onOpenHelp={() => platform.openLink("https://opencode.ai/desktop-feedback")}
       renderPanel={() =>
