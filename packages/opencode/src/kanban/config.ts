@@ -70,9 +70,6 @@ export const load = Effect.fn("KanbanConfig.load")(function* (profile: string) {
   const defaultConfig = yield* loadFile(path.join(dir, "default.json"))
   if (defaultConfig) return defaultConfig
 
-  const legacyConfig = yield* loadFile(path.join(ctx.directory, ".opencode", "kanban.json"))
-  if (legacyConfig) return legacyConfig
-
   return undefined
 })
 
@@ -90,13 +87,7 @@ export const listProfiles = Effect.fn("KanbanConfig.listProfiles")(function* () 
     Effect.orElseSucceed(() => [] as string[]),
   )
 
-  const legacyExists = yield* fs
-    .readFileStringSafe(path.join(ctx.directory, ".opencode", "kanban.json"))
-    .pipe(Effect.map(() => true), Effect.orElseSucceed(() => false))
-
-  const profiles = [...dirProfiles]
-  if (legacyExists && !profiles.includes("default")) profiles.push("default")
-  return profiles
+  return [...dirProfiles]
 })
 
 export const getStage = (config: Config, stageName: string): Stage | undefined =>
