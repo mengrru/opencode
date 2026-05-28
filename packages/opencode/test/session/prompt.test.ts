@@ -54,6 +54,7 @@ import { awaitWithTimeout, pollWithTimeout, testEffect } from "../lib/effect"
 import { reply, TestLLMServer } from "../lib/llm-server"
 import { SyncEvent } from "@/sync"
 import { RuntimeFlags } from "@/effect/runtime-flags"
+import { Kanban } from "@/kanban/kanban"
 import { EventV2Bridge } from "@/event-v2-bridge"
 
 void Log.init({ print: false })
@@ -196,6 +197,7 @@ function makePrompt(input?: { processor?: "blocking" }) {
     Layer.provide(Ripgrep.defaultLayer),
     Layer.provide(Format.defaultLayer),
     Layer.provide(RuntimeFlags.layer({ experimentalEventSystem: true })),
+    Layer.provide(Kanban.defaultLayer),
     Layer.provideMerge(todo),
     Layer.provideMerge(question),
     Layer.provideMerge(deps),
