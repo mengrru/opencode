@@ -35,6 +35,7 @@ import { NewSessionDesignView, NewSessionView, SessionHeader } from "@/component
 import { useComments } from "@/context/comments"
 import { getSessionPrefetch, SESSION_PREFETCH_TTL } from "@/context/global-sync/session-prefetch"
 import { useServerSync } from "@/context/server-sync"
+import { getSessionHandoff, getSessionHandoffVersion, setSessionHandoff } from "@/pages/session/handoff"
 import { useLanguage } from "@/context/language"
 import { useLayout } from "@/context/layout"
 import { usePrompt } from "@/context/prompt"
@@ -208,6 +209,26 @@ export default function Page() {
       prompt.set([{ type: "text", content: text, start: 0, end: text.length }], text.length)
       setSearchParams({ ...searchParams, prompt: undefined })
     })
+  })
+
+  createEffect(() => {
+    if (!prompt.ready()) return
+    if (!params.id) return
+    getSessionHandoffVersion()
+    const handoff = getSessionHandoff(sessionKey())
+    if (!handoff?.autoSend || !handoff.prompt) return
+    const currentModel = local.model.current()
+    if (!currentModel) return
+    setSessionHandoff(sessionKey(), { autoSend: false })
+    sdk.client.session
+      .promptAsync({
+        sessionID: params.id,
+        directory: sdk.directory,
+        model: { providerID: currentModel.provider.id, modelID: currentModel.id },
+        agent: local.agent.current()?.name ?? "build",
+        parts: [{ type: "text", text: handoff.prompt }],
+      })
+      .catch(() => {})
   })
 
   const [ui, setUi] = createStore({

@@ -29,6 +29,9 @@ import * as Log from "@opencode-ai/core/util/log"
 import { LspTool } from "./lsp"
 import * as Truncate from "./truncate"
 import { ApplyPatchTool } from "./apply_patch"
+import { KanbanTransitionTool } from "./kanban-transition"
+import { KanbanStatusTool } from "./kanban-status"
+import { Kanban } from "@/kanban/kanban"
 import { Glob } from "@opencode-ai/core/util/glob"
 import path from "path"
 import { pathToFileURL } from "url"
@@ -104,6 +107,7 @@ export const layer: Layer.Layer<
   | Format.Service
   | Truncate.Service
   | RuntimeFlags.Service
+  | Kanban.Service
 > = Layer.effect(
   Service,
   Effect.gen(function* () {
@@ -133,6 +137,8 @@ export const layer: Layer.Layer<
     const patchtool = yield* ApplyPatchTool
     const skilltool = yield* SkillTool
     const agent = yield* Agent.Service
+    const kanbanTransition = yield* KanbanTransitionTool
+    const kanbanStatus = yield* KanbanStatusTool
 
     const state = yield* InstanceState.make<State>(
       Effect.fn("ToolRegistry.state")(function* (ctx) {
@@ -241,6 +247,8 @@ export const layer: Layer.Layer<
           question: Tool.init(question),
           lsp: Tool.init(lsptool),
           plan: Tool.init(plan),
+          kanban_transition: Tool.init(kanbanTransition),
+          kanban_status: Tool.init(kanbanStatus),
         })
 
         return {
@@ -263,6 +271,7 @@ export const layer: Layer.Layer<
             tool.patch,
             ...(flags.experimentalLspTool ? [tool.lsp] : []),
             ...(flags.experimentalPlanMode && flags.client === "cli" ? [tool.plan] : []),
+            ...(flags.experimentalKanban ? [tool.kanban_transition, tool.kanban_status] : []),
           ],
           task: tool.task,
           read: tool.read,
@@ -393,7 +402,10 @@ export const defaultLayer = Layer.suspend(() =>
       Layer.provide(Ripgrep.defaultLayer),
       Layer.provide(Truncate.defaultLayer),
     )
-    .pipe(Layer.provide(RuntimeFlags.defaultLayer)),
+    .pipe(
+      Layer.provide(Kanban.defaultLayer),
+      Layer.provide(RuntimeFlags.defaultLayer),
+    ),
 )
 
 function isZodType(value: unknown): value is z.ZodType {
