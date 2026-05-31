@@ -300,7 +300,7 @@ export const DialogKanban: Component<Props> = (props) => {
 
   return (
     <Dialog size="x-large" transition class="!max-w-[85vw]">
-      <div class="flex flex-col h-[75vh]">
+      <div class="flex flex-col h-full">
         <div class="flex items-center justify-between px-6 pt-4 pb-3">
            <div class="flex items-center gap-3">
             <h2 class="text-16-semibold text-text-base">Kanban Board</h2>
