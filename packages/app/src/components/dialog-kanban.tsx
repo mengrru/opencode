@@ -239,6 +239,50 @@ export const DialogKanban: Component<Props> = (props) => {
     if (!loading()) void loadAll()
   }))
 
+  async function handleExport() {
+    const data = {
+      version: 1,
+      profile: p(),
+      tasks: tasks().map((t) => ({
+        title: t.title,
+        description: t.description,
+        stage: t.stage,
+        order: t.order,
+      })),
+    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `kanban-${p()}-${new Date().toISOString().slice(0, 10)}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  async function handleImport(file: File) {
+    try {
+      const text = await file.text()
+      const data = JSON.parse(text)
+      if (!data?.tasks || !Array.isArray(data.tasks)) {
+        setError("Invalid import file: missing tasks array")
+        return
+      }
+      for (const item of data.tasks) {
+        if (!item.title) continue
+        await globalSDK.client.kanban.profile.task.create({
+          path_profile: p(),
+          directory: dir(),
+          title: item.title,
+          description: item.description,
+          stage: item.stage,
+        })
+      }
+      await loadTasks()
+    } catch (e: any) {
+      setError(e.message ?? "Failed to import tasks")
+    }
+  }
+
   const stages = () => {
     const cfg = config()
     if (!cfg) return []
@@ -258,7 +302,7 @@ export const DialogKanban: Component<Props> = (props) => {
     <Dialog size="x-large" transition class="!max-w-[85vw]">
       <div class="flex flex-col h-[75vh]">
         <div class="flex items-center justify-between px-6 pt-4 pb-3">
-          <div class="flex items-center gap-3">
+           <div class="flex items-center gap-3">
             <h2 class="text-16-semibold text-text-base">Kanban Board</h2>
             <Select
               options={profileOptions()}
@@ -269,7 +313,26 @@ export const DialogKanban: Component<Props> = (props) => {
               variant="secondary"
               size="small"
             />
-          </div>
+           </div>
+           <div class="flex items-center gap-1.5">
+            <Button variant="ghost" size="small" onClick={handleExport} disabled={tasks().length === 0}>
+              <Icon name="download" size="small" />
+            </Button>
+            <Button variant="ghost" size="small" onClick={() => document.getElementById("kanban-import-input")?.click()}>
+              <Icon name="cloud-upload" size="small" />
+            </Button>
+            <input
+              id="kanban-import-input"
+              type="file"
+              accept=".json"
+              class="hidden"
+              onChange={(e) => {
+                const file = e.currentTarget.files?.[0]
+                if (file) handleImport(file)
+                e.currentTarget.value = ""
+              }}
+            />
+           </div>
         </div>
 
         <Show when={error()}>
