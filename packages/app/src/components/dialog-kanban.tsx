@@ -67,8 +67,14 @@ export const DialogKanban: Component<Props> = (props) => {
   const isSessionWorking = (sessionID: string) => (sessionStatuses[sessionID]?.type ?? "idle") !== "idle"
 
   createEffect(() => {
-    globalSDK.client.session.status({ directory: dir() }).then((result) => {
-      if (result.data) setSessionStatuses(result.data as any)
+    const directory = dir()
+
+    globalSDK.client.session.status({ directory }).then((result) => {
+      if (!result.data) return
+      const statuses = result.data as Record<string, { type: string }>
+      for (const [id, status] of Object.entries(statuses)) {
+        setSessionStatuses(id, status as any)
+      }
     }).catch(() => {})
 
     const unsub = globalSDK.event.listen((e) => {
@@ -416,6 +422,7 @@ export const DialogKanban: Component<Props> = (props) => {
                                         variant="primary"
                                         size="small"
                                         onClick={() => handleApprove(t.id)}
+                                        disabled={t.sessionID ? isSessionWorking(t.sessionID) : false}
                                       >
                                         Approve
                                       </Button>
